@@ -8,8 +8,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "start": "npm run build && node dist/index.js",
-    "build": "tsc -p .",
+    "start": "node src/index.js",
     "dev": "node --env-file=.env --watch src/index.js"
   },
   "keywords": [],
