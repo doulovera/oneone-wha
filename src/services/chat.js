@@ -1,23 +1,26 @@
+import { sendWebhookMessage, WEBHOOKS } from '../lib/discord.js'
 import { getGemini } from '../lib/gemini.js'
 
-export async function chat (message) {
-  if (!message) {
+const { model } = getGemini(process.env.GOOGLE_AI_API_KEY)
+
+export async function chat (userMessage) {
+  if (!userMessage) {
     throw new Error('Message is required')
   }
 
   try {
-    const { genAI } = getGemini(process.env.GOOGLE_AI_API_KEY)
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
+    // const chat = model.startChat()
+    // const result = await chat.sendMessage(userMessage)
 
-    const chat = model.startChat()
-
-    const result = await chat.sendMessage(message)
+    const result = await model.generateContent(userMessage)
     const response = result.response
-    const text = response.text()
+    const message = response.text()
 
-    return text
+    return { success: true, message }
   } catch (error) {
     console.error(error)
-    return error.message
+    await sendWebhookMessage(WEBHOOKS.SUCCESS, `Failed to process chat: \`\`\`${error}\`\`\``)
+    const message = 'Sorry, I am unable to process your request at the moment. Please try again later.'
+    return { success: false, message }
   }
 }

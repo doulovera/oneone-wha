@@ -1,17 +1,25 @@
 import express from 'express'
 import { chat } from './services/chat.js'
 import { sendMessage } from './lib/whatsapp.js'
+import logOnPetition from './middlewares/log-on-petition.js'
+import { sendWebhookMessage, WEBHOOKS } from './lib/discord.js'
 
 const app = express()
 app.use(express.json())
+app.use(logOnPetition)
 
 const FB_VERIFICATION_TOKEN = process.env.FB_VERIFICATION_TOKEN
 
-app.get('/ping', (req, res) => {
+app.get('/', (req, res) => {
+  return res.json({ res: 'One-One WHA | Server running' })
+})
+
+app.get('/ping', async (req, res) => {
+  await sendWebhookMessage(WEBHOOKS.SUCCESS, 'Webhook verified successfully!')
   return res.send(true)
 })
 
-app.get('/wha/webhook', (req, res) => {
+app.get('/wha/webhook', async (req, res) => {
   const mode = req.query['hub.mode']
   const token = req.query['hub.verify_token']
   const challenge = req.query['hub.challenge']
@@ -19,6 +27,7 @@ app.get('/wha/webhook', (req, res) => {
   if (mode === 'subscribe' && token === FB_VERIFICATION_TOKEN) {
     res.status(200).send(challenge)
     console.log('Webhook verified successfully!')
+    await sendWebhookMessage(WEBHOOKS.SUCCESS, 'Webhook verified successfully!')
   } else {
     res.sendStatus(403)
   }
@@ -26,31 +35,44 @@ app.get('/wha/webhook', (req, res) => {
 
 app.post('/wha/webhook', async (req, res) => {
   try {
-    // console.log('Incoming webhook message:', JSON.stringify(req.body, null, 2))
+    const { messages } = req.body.entry?.[0]?.changes[0]?.value
 
-    const senderMessage = req.body.entry?.[0]?.changes[0]?.value?.messages?.[0]
+    if (!messages) {
+      console.log(req.body)
+      return res.sendStatus(200)
+    }
 
-    const message = senderMessage?.text?.body
+    const [senderMessage] = messages || []
+
+    const userMessage = senderMessage?.text?.body
     const messageId = senderMessage?.id
     const senderNumber = senderMessage?.from
 
-    console.log('Incoming message:', message)
+    console.log('Incoming message:', userMessage)
 
-    if (message && message.length > 10) {
-      const response = await chat(message)
-      console.log('Response:', response)
+    const { success, message } = await chat(userMessage)
 
+    if (!success) {
       await sendMessage({
         to: senderNumber,
         replyInfo: { id: messageId },
-        message: response,
+        message,
       })
+
+      return res.sendStatus(200)
     }
+
+    console.log('Response:', message)
+
+    await sendMessage({
+      to: senderNumber,
+      replyInfo: { id: messageId },
+      message,
+    })
 
     return res.sendStatus(200)
   } catch (error) {
-    // return res.status(500).send(error.message)
-    console.error(error)
+    console.error(error.error)
     return res.sendStatus(500)
   }
 })
