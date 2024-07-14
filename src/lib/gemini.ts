@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 // const GEMINI_MODEL = 'gemini-1.5-flash'
 const GEMINI_MODEL = 'gemini-1.0-pro-001'
 
-export const getGemini = (key) => {
+export const getGemini = (key: string) => {
   const genAI = new GoogleGenerativeAI(key)
   const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
 

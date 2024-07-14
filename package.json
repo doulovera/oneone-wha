@@ -3,22 +3,32 @@
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
-  "type": "module",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "node --env-file=.env --watch src/index.js"
+    "start": "npm run build && node dist/index.js",
+    "build": "tsc",
+    "dev": "tsx --env-file=.env --watch src/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.11.3",
+    "express": "^4.19.2"
+  },
   "devDependencies": {
-    "standard": "^17.1.0"
+    "@types/express": "^4.17.21",
+    "standard": "^17.1.0",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3"
   },
   "eslintConfig": {
     "extends": "standard",
+    "ignorePatterns": [
+      "dist/"
+    ],
     "rules": {
       "comma-dangle": [
         "warn",
@@ -26,9 +36,5 @@
       ],
       "no-unused-vars": "warn"
     }
-  },
-  "dependencies": {
-    "@google/generative-ai": "^0.11.3",
-    "express": "^4.19.2"
   }
 }

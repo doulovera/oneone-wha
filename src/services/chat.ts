@@ -1,9 +1,9 @@
-import { sendWebhookMessage, WEBHOOKS } from '../lib/discord.js'
-import { getGemini } from '../lib/gemini.js'
+import { sendWebhookMessage, WEBHOOKS } from '../lib/discord'
+import { getGemini } from '../lib/gemini'
 
-const { model } = getGemini(process.env.GOOGLE_AI_API_KEY)
+const { model } = getGemini(process.env.GOOGLE_AI_API_KEY!)
 
-export async function chat (userMessage) {
+export async function chat (userMessage: string) {
   if (!userMessage) {
     throw new Error('Message is required')
   }

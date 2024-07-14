@@ -9,7 +9,10 @@ const url = `https://graph.facebook.com/${fbVersion}/${WHA_NUMBER_ID}/messages`
 //   TEXT: 'text',
 // }
 
-export const sendMessage = async ({ to, replyInfo, message }) => {
+export const sendMessage = async (
+  { to, replyInfo, message }:
+  { to: string, replyInfo: { id: string }, message: string }
+) => {
   const response = await fetch(url, {
     method: 'POST',
     headers: {

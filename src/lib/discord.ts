@@ -1,10 +1,10 @@
 export const WEBHOOKS = {
   SUCCESS: process.env.DS_WEBHOOK_SUCCESS,
-}
+} as const
 
-export async function sendWebhookMessage (webhook, message) {
+export async function sendWebhookMessage (webhook: typeof WEBHOOKS[keyof typeof WEBHOOKS], message: string) {
   try {
-    return fetch(webhook, {
+    return fetch(webhook!, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

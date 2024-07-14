@@ -1,4 +1,4 @@
-const logOnPetition = (req, res, next) => {
+const logOnPetition = (req: any, res: any, next: any) => {
   console.info(`${req.method} - ${req.url}`)
   next()
 }

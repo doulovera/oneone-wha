@@ -1,8 +1,8 @@
 import express from 'express'
-import { chat } from './services/chat.js'
-import { sendMessage } from './lib/whatsapp.js'
-import logOnPetition from './middlewares/log-on-petition.js'
-import { sendWebhookMessage, WEBHOOKS } from './lib/discord.js'
+import { chat } from './services/chat'
+import { sendMessage } from './lib/whatsapp'
+import logOnPetition from './middlewares/log-on-petition'
+import { sendWebhookMessage, WEBHOOKS } from './lib/discord'
 
 const app = express()
 app.use(express.json())
@@ -10,16 +10,15 @@ app.use(logOnPetition)
 
 const FB_VERIFICATION_TOKEN = process.env.FB_VERIFICATION_TOKEN
 
-app.get('/', (req, res) => {
+app.get('/', (req: any, res: any) => {
   return res.json({ res: 'One-One WHA | Server running' })
 })
 
-app.get('/ping', async (req, res) => {
-  await sendWebhookMessage(WEBHOOKS.SUCCESS, 'Webhook verified successfully!')
-  return res.send(true)
+app.get('/ping', async (req: any, res: any) => {
+  return res.send({ ok: true })
 })
 
-app.get('/wha/webhook', async (req, res) => {
+app.get('/wha/webhook', async (req: any, res: any) => {
   const mode = req.query['hub.mode']
   const token = req.query['hub.verify_token']
   const challenge = req.query['hub.challenge']
@@ -33,7 +32,7 @@ app.get('/wha/webhook', async (req, res) => {
   }
 })
 
-app.post('/wha/webhook', async (req, res) => {
+app.post('/wha/webhook', async (req: any, res: any) => {
   try {
     const { messages } = req.body.entry?.[0]?.changes[0]?.value
 
@@ -50,17 +49,7 @@ app.post('/wha/webhook', async (req, res) => {
 
     console.log('Incoming message:', userMessage)
 
-    const { success, message } = await chat(userMessage)
-
-    if (!success) {
-      await sendMessage({
-        to: senderNumber,
-        replyInfo: { id: messageId },
-        message,
-      })
-
-      return res.sendStatus(200)
-    }
+    const { message } = await chat(userMessage)
 
     console.log('Response:', message)
 
@@ -72,7 +61,7 @@ app.post('/wha/webhook', async (req, res) => {
 
     return res.sendStatus(200)
   } catch (error) {
-    console.error(error.error)
+    console.error((error as any).error)
     return res.sendStatus(500)
   }
 })
