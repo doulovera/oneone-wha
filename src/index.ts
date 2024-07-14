@@ -3,6 +3,7 @@ import { chat } from './services/chat'
 import { sendMessage } from './lib/whatsapp'
 import logOnPetition from './middlewares/log-on-petition'
 import { sendWebhookMessage, WEBHOOKS } from './lib/discord'
+import { PORT } from './constants/config'
 
 const app = express()
 app.use(express.json())
@@ -26,7 +27,10 @@ app.get('/wha/webhook', async (req: any, res: any) => {
   if (mode === 'subscribe' && token === FB_VERIFICATION_TOKEN) {
     res.status(200).send(challenge)
     console.log('Webhook verified successfully!')
-    await sendWebhookMessage(WEBHOOKS.SUCCESS, 'Webhook verified successfully!')
+    await sendWebhookMessage(
+      WEBHOOKS.SUCCESS,
+      'Webhook verified successfully!',
+    )
   } else {
     res.sendStatus(403)
   }
@@ -66,6 +70,6 @@ app.post('/wha/webhook', async (req: any, res: any) => {
   }
 })
 
-app.listen(3000, () => {
-  console.log('One-One WHA | Server running on port 3000')
+app.listen(PORT, () => {
+  console.log(`One-One WHA | Server running on port ${PORT}`)
 })
